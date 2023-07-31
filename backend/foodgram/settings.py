@@ -34,6 +34,8 @@ INSTALLED_APPS = [
     'djoser',
     'users.apps.UsersConfig',
     'rest_framework.authtoken'
+    'api.apps.ApiConfig',
+    'recipes.apps.RecipesConfig',
 
 ]
 
@@ -131,5 +133,5 @@ STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 DJOSER = {
-
+    'LOGIN_FIELD': "email",
 }
