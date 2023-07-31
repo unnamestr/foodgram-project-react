@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(db_index=True, max_length=200, unique=True)),
-                ('color', models.CharField(max_length=7, unique=True, validators=[recipes.validators.validate_tag_color])),
+                ('color', models.CharField(max_length=7, unique=True)),
                 ('slug', models.SlugField(unique=True)),
             ],
             options={

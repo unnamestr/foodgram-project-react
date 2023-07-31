@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'api.apps.ApiConfig',
     'recipes.apps.RecipesConfig',
+    'django_filters',
 
 ]
 

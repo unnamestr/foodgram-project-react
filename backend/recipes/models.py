@@ -1,12 +1,12 @@
 from django.db import models
 
 from users.models import User
-from recipes.validators import validate_recipe_cooking_time, validate_tag_color
+from recipes.validators import validate_recipe_cooking_time, validate_tag_slug
 class Tag(models.Model):
 
     name = models.CharField(max_length=200, unique=True, db_index=True)
-    color = models.CharField(max_length=7, unique=True, validators=[validate_tag_color])
-    slug = models.SlugField(unique=True)
+    color = models.CharField(max_length=7, unique=True)
+    slug = models.SlugField(unique=True, validators=[validate_tag_slug])
 
     def __str__(self):
         return self.name

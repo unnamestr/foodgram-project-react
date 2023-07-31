@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError
 import re
 
-def validate_tag_color(value):
+def validate_tag_slug(value):
     pattern = r'^[-a-zA-Z0-9_]+$'
     if not re.match(pattern, value):
         raise ValidationError('Некорректный HEX код',
