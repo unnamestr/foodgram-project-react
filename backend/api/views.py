@@ -1,7 +1,7 @@
 from rest_framework.viewsets import ModelViewSet
 
-from recipes.models import Tag, Ingredient
-from .serializers import TagSerializer, IngredientSerializer
+from recipes.models import Tag, Ingredient, Recipe
+from .serializers import TagSerializer, IngredientSerializer, RecipeSerializer
 from rest_framework import filters
 
 class TagViewSet(ModelViewSet):
@@ -13,3 +13,7 @@ class IngredientViewSet(ModelViewSet):
     serializer_class = IngredientSerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('^name',)
+
+class RecipeViewSet(ModelViewSet):
+    queryset = Recipe.objects.all()
+    serializer_class = RecipeSerializer
