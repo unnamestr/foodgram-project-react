@@ -42,7 +42,8 @@ class Ingredient(models.Model):
     class Meta:
         ordering = ['name']
 
-class CountIngredient(models.Model):
+class IngredientInRecipe(models.Model):
+    # CountIngredient
     recipe = models.ForeignKey(Recipe, related_name='ingredients', on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredient, related_name='ingredient_counter', on_delete=models.CASCADE)
     amount = models.IntegerField(validators=[validate_ingredient_counter])

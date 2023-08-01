@@ -1,13 +1,13 @@
 from django.contrib import admin
 
-from .models import Tag, Recipe, Ingredient, CountIngredient
+from .models import Tag, Recipe, Ingredient, IngredientInRecipe
 
-class CountIngredientInline(admin.StackedInline):
-    model = CountIngredient
+class IngredientInRecipeInline(admin.StackedInline):
+    model = IngredientInRecipe
     extra = 1
 
 class RecipeAdmin(admin.ModelAdmin):
-    inlines = [CountIngredientInline]
+    inlines = [IngredientInRecipeInline]
 
 admin.site.register(Recipe,RecipeAdmin)
 admin.site.register([Tag, Ingredient])
