@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
             name='CountIngredient',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('amount', models.IntegerField(validators=[recipes.validators.validate_ingredient_counter])),
+                ('amount', models.IntegerField()),
                 ('ingredient', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='ingredient_counter', to='recipes.ingredient')),
                 ('recipe', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='ingredients', to='recipes.recipes')),
             ],

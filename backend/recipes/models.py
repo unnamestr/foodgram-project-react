@@ -1,7 +1,7 @@
 from django.db import models
 
 from users.models import User
-from recipes.validators import validate_recipe_cooking_time, validate_tag_slug, validate_ingredient_counter
+from recipes.validators import validate_recipe_cooking_time, validate_tag_slug, validate_ingredientInRecipe_amount
 class Tag(models.Model):
 
     name = models.CharField(max_length=200, unique=True, db_index=True)
@@ -43,10 +43,9 @@ class Ingredient(models.Model):
         ordering = ['name']
 
 class IngredientInRecipe(models.Model):
-    # CountIngredient
     recipe = models.ForeignKey(Recipe, related_name='ingredients', on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredient, related_name='ingredient_counter', on_delete=models.CASCADE)
-    amount = models.IntegerField(validators=[validate_ingredient_counter])
+    amount = models.IntegerField(validators=[validate_ingredientInRecipe_amount])
 
     class Meta:
         constraints = (models.UniqueConstraint(fields=('recipe', 'ingredient'), name='unique_recipe_ingredient'),)
@@ -58,3 +57,10 @@ class FavoriteRecipe(models.Model):
 
     class Meta:
         constraints = (models.UniqueConstraint(fields=('user', 'recipe'), name='unique_user_recipe'),)
+
+class ShoppingCart(models.Model):
+    user = models.ForeignKey(User, related_name='shopping_cart', on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, related_name='in_shopping_cart', on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = (models.UniqueConstraint(fields=('user', 'recipe'), name='unique_user_recipe_cart'),)

@@ -12,7 +12,7 @@ def validate_recipe_cooking_time(value):
         raise ValidationError('Время не может быть меньше одной минуты.',
                               params={'value': value})
 
-def validate_ingredient_counter(value):
+def validate_ingredientInRecipe_amount(value):
     if value <= 0:
         raise ValidationError('Неверное количество ингредиентов.',
                               params={'value': value})
