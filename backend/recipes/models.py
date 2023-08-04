@@ -17,7 +17,7 @@ class Tag(models.Model):
 class Recipe(models.Model):
     author = models.ForeignKey(User, related_name='recipes', on_delete=models.CASCADE, db_index=True)
     name = models.CharField(max_length=200, unique=True)
-    image = models.ImageField(upload_to='recipes/', null=True)
+    image = models.ImageField(upload_to='media/upload/', null=True)
     text = models.TextField()
     tags = models.ManyToManyField(Tag)
     cooking_time = models.IntegerField(validators=[validate_recipe_cooking_time])
@@ -64,3 +64,6 @@ class ShoppingCart(models.Model):
 
     class Meta:
         constraints = (models.UniqueConstraint(fields=('user', 'recipe'), name='unique_user_recipe_cart'),)
+
+    def get_list(self, user: User):
+        print(self.objects.filter(user=user))

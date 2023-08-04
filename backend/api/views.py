@@ -5,9 +5,11 @@ from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status, filters
 from django.shortcuts import get_object_or_404
+from django.http.response import HttpResponse
 
-from recipes.models import Tag, Ingredient, Recipe, FavoriteRecipe
-from api.serializers import TagSerializer, IngredientSerializer, RecipeSerializer, FavoriteRecipeSerializer
+from recipes.models import Tag, Ingredient, Recipe, FavoriteRecipe, ShoppingCart
+from api.serializers import TagSerializer, IngredientSerializer, RecipeSerializer, FavoriteRecipeSerializer, \
+    ShoppingCartSerializer
 
 
 class TagViewSet(ModelViewSet):
@@ -31,7 +33,8 @@ class FavoriteRecipeView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, recipe_id):
-        serializer = FavoriteRecipeSerializer(data={'user': request.user.id, 'recipe': recipe_id})
+        serializer = FavoriteRecipeSerializer(data={'user': request.user.id, 'recipe': recipe_id},
+                                              context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -45,19 +48,34 @@ class FavoriteRecipeView(APIView):
         FavoriteRecipe.objects.filter(user=user_id, recipe=recipe).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
 class ShoppingCartView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, recipe_id):
-        pass
+        serializer = ShoppingCartSerializer(data={'user': request.user.id, 'recipe': recipe_id},
+                                            context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, recipe_id):
-        pass
+        user_id = request.user.id
+        if not ShoppingCart.objects.filter(user=user_id, recipe=recipe_id).exists():
+            return Response({"errors": "рецепта нет в списке покупок"}, status=status.HTTP_400_BAD_REQUEST)
+        recipe = get_object_or_404(Recipe, id=recipe_id)
+        ShoppingCart.objects.filter(user=user_id, recipe=recipe).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-@api_view(['GET',])
+
+@api_view(['GET', ])
 def download_shopping_cart(request):
     if not request.user.is_authenticated:
         return Response({"detail": "Authentication credentials were not provided."},
                         status=status.HTTP_401_UNAUTHORIZED)
     user = request.user
-    return Response(status=status.HTTP_200_OK)
+    filename = 'shopping_list.txt'
+    response = HttpResponse(user.get_shopping_list(), content_type='text/plain')
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response
