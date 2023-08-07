@@ -37,9 +37,17 @@ class IngredientInRecipeSerializer(ModelSerializer):
 
 
 class UserSerializer(ModelSerializer):
+    is_subscribed = SerializerMethodField(read_only=True)
     class Meta:
         model = User
-        fields = ['id', 'email', 'username', 'last_name', 'first_name']
+        fields = ['id', 'email', 'username', 'last_name', 'first_name', 'is_subscribed']
+
+    def get_is_subscribed(self, obj):
+        request = self.context.get('request')
+        user = request.user
+        if not user.is_authenticated:
+            return False
+        return True
 
 
 class RecipeSerializer(ModelSerializer):

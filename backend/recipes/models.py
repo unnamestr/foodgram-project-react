@@ -64,6 +64,3 @@ class ShoppingCart(models.Model):
 
     class Meta:
         constraints = (models.UniqueConstraint(fields=('user', 'recipe'), name='unique_user_recipe_cart'),)
-
-    def get_list(self, user: User):
-        print(self.objects.filter(user=user))

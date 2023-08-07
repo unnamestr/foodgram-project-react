@@ -1,27 +1,31 @@
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet, GenericViewSet
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status, filters
 from django.shortcuts import get_object_or_404
 from django.http.response import HttpResponse
+from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin
 
 from recipes.models import Tag, Ingredient, Recipe, FavoriteRecipe, ShoppingCart
+from users.models import User
 from api.serializers import TagSerializer, IngredientSerializer, RecipeSerializer, FavoriteRecipeSerializer, \
-    ShoppingCartSerializer
+    ShoppingCartSerializer, UserSerializer
 
 
-class TagViewSet(ModelViewSet):
+class TagViewSet(ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    pagination_class = None
 
 
-class IngredientViewSet(ModelViewSet):
+class IngredientViewSet(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('^name',)
+    pagination_class = None
 
 
 class RecipeViewSet(ModelViewSet):
@@ -79,3 +83,9 @@ def download_shopping_cart(request):
     response = HttpResponse(user.get_shopping_list(), content_type='text/plain')
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     return response
+
+
+class UserViewSet(CreateModelMixin, ListModelMixin, RetrieveModelMixin, GenericViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = (AllowAny,)
