@@ -1,7 +1,7 @@
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet, GenericViewSet
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, action
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status, filters
 from django.shortcuts import get_object_or_404
@@ -11,7 +11,7 @@ from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveMode
 from recipes.models import Tag, Ingredient, Recipe, FavoriteRecipe, ShoppingCart
 from users.models import User
 from api.serializers import TagSerializer, IngredientSerializer, RecipeSerializer, FavoriteRecipeSerializer, \
-    ShoppingCartSerializer, UserSerializer
+    ShoppingCartSerializer, UserSerializer, PasswordSerializer
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -89,3 +89,18 @@ class UserViewSet(CreateModelMixin, ListModelMixin, RetrieveModelMixin, GenericV
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (AllowAny,)
+
+    @action(detail=False, url_path='me', permission_classes=[IsAuthenticated])
+    def user_me(self, request):
+        serializer = self.serializer_class(request.user, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['post'], url_path='set_password', permission_classes=[IsAuthenticated])
+    def set_password(self, request):
+        user = request.user
+        serializer = PasswordSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            user.set_password(serializer.validated_data['new_password'])
+            user.save()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

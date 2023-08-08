@@ -1,4 +1,5 @@
-from rest_framework.serializers import ModelSerializer, SerializerMethodField
+from django.contrib.auth.password_validation import validate_password
+from rest_framework.serializers import ModelSerializer, SerializerMethodField, Serializer, CharField, ValidationError
 from rest_framework.validators import UniqueTogetherValidator
 
 from recipes.models import Tag, Ingredient, Recipe, IngredientInRecipe, FavoriteRecipe, ShoppingCart
@@ -101,3 +102,17 @@ class ShoppingCartSerializer(ModelSerializer):
         request = self.context.get('request')
         image_url = request.build_absolute_uri(recipe.image.url)
         return {'id': recipe.id, 'name': recipe.name, 'image': image_url, 'cooking_time': recipe.cooking_time}
+
+class PasswordSerializer(Serializer):
+    new_password = CharField(required=True)
+    current_password = CharField(required=True)
+
+    def validate_current_password(self, current_password):
+        user = self.context['request'].user
+        if user.check_password(current_password):
+            return current_password
+        raise ValidationError('The data provided is incorrect')
+
+    def validate_new_password(self, new_password):
+        validate_password(new_password)
+        return new_password
