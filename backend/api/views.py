@@ -7,6 +7,7 @@ from rest_framework import status, filters
 from django.shortcuts import get_object_or_404
 from django.http.response import HttpResponse
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin
+from django_filters.rest_framework import DjangoFilterBackend
 
 from recipes.models import Tag, Ingredient, Recipe, FavoriteRecipe, ShoppingCart
 from users.models import User
@@ -31,6 +32,8 @@ class IngredientViewSet(ReadOnlyModelViewSet):
 class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
+    filter_backends = (DjangoFilterBackend,)
+    #filterset_fields = ('is_favorited', 'is_in_shopping_cart', 'author', 'tags')
 
 
 class FavoriteRecipeView(APIView):
@@ -125,4 +128,7 @@ class UserViewSet(CreateModelMixin, ListModelMixin, RetrieveModelMixin, GenericV
 
     @action(detail=False, url_path='subscriptions', permission_classes=[IsAuthenticated])
     def subscriptions(self, request):
-        return Response(status=status.HTTP_200_OK)
+        recipes_limit = request.query_params.get('recipes_limit')
+        serializer = UserWithRecipeSerializer(self.paginate_queryset(User.objects.filter(following__user=request.user)),
+                                              many=True, context={"request": request, 'recipes_limit': recipes_limit})
+        return self.get_paginated_response(serializer.data)

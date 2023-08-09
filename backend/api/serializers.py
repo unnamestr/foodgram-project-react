@@ -133,8 +133,10 @@ class UserWithRecipeSerializer(UserSerializer):
         fields = UserSerializer.Meta.fields + ["recipes", "recipes_count"]
 
     def get_recipes(self, obj):
-        query = obj.recipes if self.context.get("recipes_limit") is None else obj.recipes[:1]
-        serializer = RecipeBaseSerializer(obj.recipes, many=True, context={"request": self.context.get("request")})
+        query = obj.recipes.all()
+        if self.context.get("recipes_limit"):
+            query = query[:int(self.context.get("recipes_limit"))]
+        serializer = RecipeBaseSerializer(query, many=True, context={"request": self.context.get("request")})
         return serializer.data
 
     def get_recipes_count(self, obj):
