@@ -39,6 +39,7 @@ class IngredientInRecipeSerializer(ModelSerializer):
 
 class UserSerializer(ModelSerializer):
     is_subscribed = SerializerMethodField(read_only=True)
+
     class Meta:
         model = User
         fields = ['id', 'email', 'username', 'last_name', 'first_name', 'is_subscribed']
@@ -46,21 +47,25 @@ class UserSerializer(ModelSerializer):
     def get_is_subscribed(self, obj):
         request = self.context.get('request')
         user = request.user
-        if not user.is_authenticated:
-            return False
-        return True
+        return False if not user.is_authenticated else user.is_following(obj)
 
 
-class RecipeSerializer(ModelSerializer):
+class RecipeBaseSerializer(ModelSerializer):
+    class Meta:
+        model = Recipe
+        fields = ['id', 'name', 'image', 'cooking_time']
+
+
+class RecipeSerializer(RecipeBaseSerializer):
     tags = TagSerializer(many=True)
     ingredients = IngredientInRecipeSerializer(many=True)
     author = UserSerializer(read_only=True)
     is_favorited = SerializerMethodField()
     is_in_shopping_cart = SerializerMethodField()
 
-    class Meta:
-        model = Recipe
-        fields = ['id', 'name', 'tags', 'author', 'ingredients', 'image', 'is_favorited', 'is_in_shopping_cart']
+    class Meta(RecipeBaseSerializer.Meta):
+        fields = RecipeBaseSerializer.Meta.fields + ['tags', 'author', 'ingredients', 'is_favorited',
+                                                     'is_in_shopping_cart']
 
     def get_is_favorited(self, obj):
         request = self.context.get('request')
@@ -90,6 +95,7 @@ class FavoriteRecipeSerializer(ModelSerializer):
         image_url = request.build_absolute_uri(recipe.image.url)
         return {'id': recipe.id, 'name': recipe.name, 'image': image_url, 'cooking_time': recipe.cooking_time}
 
+
 class ShoppingCartSerializer(ModelSerializer):
     class Meta:
         model = ShoppingCart
@@ -102,6 +108,7 @@ class ShoppingCartSerializer(ModelSerializer):
         request = self.context.get('request')
         image_url = request.build_absolute_uri(recipe.image.url)
         return {'id': recipe.id, 'name': recipe.name, 'image': image_url, 'cooking_time': recipe.cooking_time}
+
 
 class PasswordSerializer(Serializer):
     new_password = CharField(required=True)
@@ -116,3 +123,19 @@ class PasswordSerializer(Serializer):
     def validate_new_password(self, new_password):
         validate_password(new_password)
         return new_password
+
+
+class UserWithRecipeSerializer(UserSerializer):
+    recipes_count = SerializerMethodField(read_only=True)
+    recipes = SerializerMethodField(read_only=True)
+
+    class Meta(UserSerializer.Meta):
+        fields = UserSerializer.Meta.fields + ["recipes", "recipes_count"]
+
+    def get_recipes(self, obj):
+        query = obj.recipes if self.context.get("recipes_limit") is None else obj.recipes[:1]
+        serializer = RecipeBaseSerializer(obj.recipes, many=True, context={"request": self.context.get("request")})
+        return serializer.data
+
+    def get_recipes_count(self, obj):
+        return obj.recipes.count()

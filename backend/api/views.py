@@ -11,7 +11,7 @@ from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveMode
 from recipes.models import Tag, Ingredient, Recipe, FavoriteRecipe, ShoppingCart
 from users.models import User
 from api.serializers import TagSerializer, IngredientSerializer, RecipeSerializer, FavoriteRecipeSerializer, \
-    ShoppingCartSerializer, UserSerializer, PasswordSerializer
+    ShoppingCartSerializer, UserSerializer, PasswordSerializer, UserWithRecipeSerializer
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -39,10 +39,10 @@ class FavoriteRecipeView(APIView):
     def post(self, request, recipe_id):
         serializer = FavoriteRecipeSerializer(data={'user': request.user.id, 'recipe': recipe_id},
                                               context={'request': request})
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request, recipe_id):
         user_id = request.user.id
@@ -59,10 +59,10 @@ class ShoppingCartView(APIView):
     def post(self, request, recipe_id):
         serializer = ShoppingCartSerializer(data={'user': request.user.id, 'recipe': recipe_id},
                                             context={'request': request})
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request, recipe_id):
         user_id = request.user.id
@@ -73,7 +73,7 @@ class ShoppingCartView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-@api_view(['GET', ])
+@api_view()
 def download_shopping_cart(request):
     if not request.user.is_authenticated:
         return Response({"detail": "Authentication credentials were not provided."},
@@ -99,8 +99,30 @@ class UserViewSet(CreateModelMixin, ListModelMixin, RetrieveModelMixin, GenericV
     def set_password(self, request):
         user = request.user
         serializer = PasswordSerializer(data=request.data, context={'request': request})
-        if serializer.is_valid():
-            user.set_password(serializer.validated_data['new_password'])
-            user.save()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        user.set_password(serializer.validated_data['new_password'])
+        user.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=['post', 'delete'], url_path='subscribe', permission_classes=[IsAuthenticated])
+    def subscribe(self, request, pk=None):
+        author = get_object_or_404(User, id=pk)
+        user = request.user
+        if user == author:
+            return Response({"detail": "Subscribe to myself"}, status=status.HTTP_400_BAD_REQUEST)
+        if request.method == "POST":
+            if user.is_following(author):
+                return Response({"detail": "Already subscribed."}, status=status.HTTP_400_BAD_REQUEST)
+            user.follow(author)
+            recipes_limit = request.query_params.get('recipes_limit')
+            serializer = UserWithRecipeSerializer(author, context={'request': request, 'recipes_limit': recipes_limit})
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if not user.is_following(author):
+            return Response({"detail": "Not subscribed."}, status=status.HTTP_400_BAD_REQUEST)
+        user.unfollow(author)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False, url_path='subscriptions', permission_classes=[IsAuthenticated])
+    def subscriptions(self, request):
+        return Response(status=status.HTTP_200_OK)
