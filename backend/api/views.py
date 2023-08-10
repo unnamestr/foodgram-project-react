@@ -13,7 +13,7 @@ from recipes.models import Tag, Ingredient, Recipe, FavoriteRecipe, ShoppingCart
 from users.models import User
 from api.serializers import TagSerializer, IngredientSerializer, RecipeSerializer, FavoriteRecipeSerializer, \
     ShoppingCartSerializer, UserSerializer, PasswordSerializer, UserWithRecipeSerializer
-
+from api.filters import RecipeFilter
 
 class TagViewSet(ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
@@ -33,7 +33,7 @@ class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     filter_backends = (DjangoFilterBackend,)
-    #filterset_fields = ('is_favorited', 'is_in_shopping_cart', 'author', 'tags')
+    filterset_class = RecipeFilter
 
 
 class FavoriteRecipeView(APIView):

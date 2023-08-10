@@ -141,3 +141,21 @@ class UserWithRecipeSerializer(UserSerializer):
 
     def get_recipes_count(self, obj):
         return obj.recipes.count()
+
+class TagBaseSerializer(ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ['id',]
+
+
+class CreateRecipeSerializer(ModelSerializer):
+    ingredients = IngredientSerializer(many=True)
+    tags = TagBaseSerializer(many=True)
+    # TODO: image field
+    author = UserSerializer(read_only=True)
+
+    class Meta:
+        model = Recipe
+        fields = (
+            'id', 'tags', 'author', 'ingredients',
+            'name', 'image', 'text', 'cooking_time',)
