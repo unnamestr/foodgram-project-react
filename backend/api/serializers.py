@@ -1,6 +1,9 @@
 from django.contrib.auth.password_validation import validate_password
-from rest_framework.serializers import ModelSerializer, SerializerMethodField, Serializer, CharField, ValidationError
+from rest_framework.serializers import ModelSerializer, SerializerMethodField, Serializer, CharField, ValidationError, \
+    PrimaryKeyRelatedField, IntegerField
 from rest_framework.validators import UniqueTogetherValidator
+from drf_extra_fields.fields import Base64ImageField
+from django.utils.translation import gettext_lazy as _
 
 from recipes.models import Tag, Ingredient, Recipe, IngredientInRecipe, FavoriteRecipe, ShoppingCart
 from users.models import User
@@ -142,20 +145,51 @@ class UserWithRecipeSerializer(UserSerializer):
     def get_recipes_count(self, obj):
         return obj.recipes.count()
 
-class TagBaseSerializer(ModelSerializer):
-    class Meta:
-        model = Tag
-        fields = ['id',]
+
+class CreateIngredientInRecipeSerializer(Serializer):
+    id = IntegerField()
+    amount = IntegerField()
 
 
 class CreateRecipeSerializer(ModelSerializer):
-    ingredients = IngredientSerializer(many=True)
-    tags = TagBaseSerializer(many=True)
-    # TODO: image field
+    ingredients = CreateIngredientInRecipeSerializer(many=True)
+    tags = PrimaryKeyRelatedField(many=True, queryset=Tag.objects.all(),
+                                  error_messages={'does_not_exist': _('invalid tag id')})
+    image = Base64ImageField(use_url=True, max_length=None)
     author = UserSerializer(read_only=True)
 
     class Meta:
         model = Recipe
-        fields = (
-            'id', 'tags', 'author', 'ingredients',
-            'name', 'image', 'text', 'cooking_time',)
+        fields = ['id', 'tags', 'author', 'image', 'ingredients', 'name', 'text', 'cooking_time']
+
+    def validate_ingredients(self, data):
+        if len(data) == 0:
+            raise ValidationError('Need ingredients')
+        uniq_ingredient = set()
+        for item in data:
+            if item['id'] not in uniq_ingredient:
+                if not Ingredient.objects.filter(id=item['id']).exists():
+                    raise ValidationError('ingredient not found.')
+                uniq_ingredient.add(item['id'])
+            else:
+                raise ValidationError('Use uniq ingredients')
+        return data
+
+    def validate_cooking_time(self, value):
+        if value < 1:
+            raise ValidationError('time cannot be less than 1')
+        return value
+
+    def create(self, data):
+        ingredients = data.pop('ingredients')
+        tags = data.pop('tags')
+        recipe = Recipe.objects.create(author=self.context.get('request').user, **data)
+        recipe.tags.set(tags)
+        [IngredientInRecipe.objects.create(ingredient_id=i['id'], amount=i['amount'], recipe=recipe) for i in ingredients]
+        return recipe
+
+    def update(self, validated_data):
+        pass
+
+    def to_representation(self, instance):
+        return RecipeSerializer(instance, context={'request': self.context.get('request')}).data
