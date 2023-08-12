@@ -17,7 +17,7 @@ class Tag(models.Model):
 class Recipe(models.Model):
     author = models.ForeignKey(User, related_name='recipes', on_delete=models.CASCADE, db_index=True)
     name = models.CharField(max_length=200, unique=True)
-    image = models.ImageField(upload_to='media/upload/', null=True)
+    image = models.ImageField(upload_to='upload/', null=True)
     text = models.TextField()
     tags = models.ManyToManyField(Tag)
     cooking_time = models.IntegerField(validators=[validate_recipe_cooking_time])
@@ -28,7 +28,7 @@ class Recipe(models.Model):
         return self.name
 
     class Meta:
-        ordering = ['name']
+        ordering = ['-pub_date', ]
 
 
 class Ingredient(models.Model):
@@ -40,7 +40,7 @@ class Ingredient(models.Model):
         return self.name
 
     class Meta:
-        ordering = ['name']
+        ordering = ['name', ]
 
 class IngredientInRecipe(models.Model):
     recipe = models.ForeignKey(Recipe, related_name='ingredients', on_delete=models.CASCADE)

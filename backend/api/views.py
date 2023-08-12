@@ -11,9 +11,11 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from recipes.models import Tag, Ingredient, Recipe, FavoriteRecipe, ShoppingCart
 from users.models import User
+from api.filters import RecipeFilter
+from api.permissions import AuthorPermission
 from api.serializers import TagSerializer, IngredientSerializer, RecipeSerializer, FavoriteRecipeSerializer, \
     ShoppingCartSerializer, UserSerializer, PasswordSerializer, UserWithRecipeSerializer, CreateRecipeSerializer
-from api.filters import RecipeFilter
+
 
 class TagViewSet(ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
@@ -33,6 +35,7 @@ class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     filter_backends = (DjangoFilterBackend,)
+    permission_classes = (AuthorPermission,)
     filterset_class = RecipeFilter
 
     def get_serializer_class(self):
