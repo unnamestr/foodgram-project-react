@@ -23,11 +23,11 @@ class User(AbstractUser):
 
     def get_shopping_list(self):
         shopping_list = []
+        t = models.Sum("recipe__ingredients__amount")
         for name, unit, total in self.shopping_cart.values_list(
                 "recipe__ingredients__ingredient__name",
                 "recipe__ingredients__ingredient__measurement_unit"
-                ).annotate(total_amount=models.Sum(
-                "recipe__ingredients__amount")):
+                ).annotate(total_amount=t):
             shopping_list.append(f'{name}: {total} {unit}')
         return '\n'.join(shopping_list)
 

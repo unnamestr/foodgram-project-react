@@ -26,8 +26,8 @@ class Recipe(models.Model):
     image = models.ImageField(upload_to='upload/', null=True)
     text = models.TextField()
     tags = models.ManyToManyField(Tag)
-    cooking_time = models.IntegerField(
-                   validators=[validate_recipe_cooking_time])
+    cooking_time = models.IntegerField(validators=[
+                                       validate_recipe_cooking_time])
     pub_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -55,8 +55,8 @@ class IngredientInRecipe(models.Model):
     ingredient = models.ForeignKey(Ingredient,
                                    related_name='ingredient_counter',
                                    on_delete=models.CASCADE)
-    amount = models.IntegerField(
-             validators=[validate_ingredientInRecipe_amount])
+    amount = models.IntegerField(validators=[
+                                 validate_ingredientInRecipe_amount])
 
     class Meta:
         constraints = (models.UniqueConstraint(

@@ -201,8 +201,8 @@ class CreateRecipeSerializer(ModelSerializer):
     def create(self, data):
         ingredients = data.pop('ingredients')
         tags = data.pop('tags')
-        recipe = Recipe.objects.create(
-                 author=self.context.get('request').user, **data)
+        recipe = Recipe.objects.create(author=self.context.get('request').user,
+                                       **data)
         recipe.tags.set(tags)
         [IngredientInRecipe.objects.create(ingredient_id=i['id'],
                                            amount=i['amount'],
@@ -220,5 +220,5 @@ class CreateRecipeSerializer(ModelSerializer):
         return super().update(obj, data)
 
     def to_representation(self, instance):
-        return RecipeSerializer(instance, context={
-               'request': self.context.get('request')}).data
+        r = self.context.get('request')
+        return RecipeSerializer(instance, context={'request': r}).data

@@ -164,9 +164,8 @@ class UserViewSet(CreateModelMixin, ListModelMixin, RetrieveModelMixin,
             permission_classes=[IsAuthenticated])
     def subscriptions(self, request):
         recipes_limit = request.query_params.get('recipes_limit')
+        c = {"request": request, 'recipes_limit': recipes_limit}
+        u = request.user
         serializer = UserWithRecipeSerializer(self.paginate_queryset(
-            User.objects.filter(following__user=request.user)),
-                                many=True, context={
-                                    "request": request,
-                                    'recipes_limit': recipes_limit})
+            User.objects.filter(following__user=u)), many=True, context=c)
         return self.get_paginated_response(serializer.data)
