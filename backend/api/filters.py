@@ -1,4 +1,6 @@
-from django_filters.rest_framework.filters import ModelChoiceFilter, ModelMultipleChoiceFilter, BooleanFilter
+from django_filters.rest_framework.filters import (ModelChoiceFilter,
+                                                   ModelMultipleChoiceFilter,
+                                                   BooleanFilter)
 from django_filters.rest_framework import FilterSet
 
 from users.models import User
@@ -7,7 +9,9 @@ from recipes.models import Recipe, Tag
 
 class RecipeFilter(FilterSet):
     author = ModelChoiceFilter(queryset=User.objects.all())
-    tags = ModelMultipleChoiceFilter(queryset=Tag.objects.all(), field_name='tags__slug', to_field_name='slug')
+    tags = ModelMultipleChoiceFilter(queryset=Tag.objects.all(),
+                                     field_name='tags__slug',
+                                     to_field_name='slug')
     is_favorited = BooleanFilter(method='filter_is_favorited')
     is_in_shopping_cart = BooleanFilter(method='filter_is_in_shopping_cart')
 
@@ -25,4 +29,5 @@ class RecipeFilter(FilterSet):
         return queryset
 
     def filter_is_in_shopping_cart(self, queryset, name, value):
-        return self.filter_related(queryset, self.request.user.shopping_cart, value)
+        return self.filter_related(queryset, self.request.user.shopping_cart,
+                                   value)

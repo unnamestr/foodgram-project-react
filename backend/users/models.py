@@ -25,7 +25,8 @@ class User(AbstractUser):
         shopping_list = []
         for name, unit, total in self.shopping_cart.values_list(
                 "recipe__ingredients__ingredient__name",
-                "recipe__ingredients__ingredient__measurement_unit").annotate(total_amount=models.Sum(
+                "recipe__ingredients__ingredient__measurement_unit"
+                ).annotate(total_amount=models.Sum(
                 "recipe__ingredients__amount")):
             shopping_list.append(f'{name}: {total} {unit}')
         return '\n'.join(shopping_list)
@@ -43,8 +44,11 @@ class User(AbstractUser):
 
 
 class Follower(models.Model):
-    user = models.ForeignKey(User, related_name='follower', on_delete=models.CASCADE)
-    author = models.ForeignKey(User, related_name='following', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name='follower',
+                             on_delete=models.CASCADE)
+    author = models.ForeignKey(User, related_name='following',
+                               on_delete=models.CASCADE)
 
     class Meta:
-        constraints = (models.UniqueConstraint(fields=('user', 'author'), name='unique_user_author'),)
+        constraints = (models.UniqueConstraint(fields=('user', 'author'),
+                                               name='unique_user_author'),)

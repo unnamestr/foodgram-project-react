@@ -1,10 +1,13 @@
 from django.contrib import admin
 
-from .models import Tag, Recipe, Ingredient, IngredientInRecipe, FavoriteRecipe, ShoppingCart
+from .models import (Tag, Recipe, Ingredient, IngredientInRecipe,
+                     FavoriteRecipe, ShoppingCart)
+
 
 class IngredientInRecipeInline(admin.StackedInline):
     model = IngredientInRecipe
     extra = 1
+
 
 class RecipeAdmin(admin.ModelAdmin):
     inlines = (IngredientInRecipeInline, )
@@ -14,6 +17,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
     def in_favorites(self, obj):
         return FavoriteRecipe.objects.filter(recipe=obj).count()
+
 
 class IngredientAdmin(admin.ModelAdmin):
     list_display = ('name', 'measurement_unit')
