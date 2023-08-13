@@ -13,7 +13,7 @@ class User(AbstractUser):
     last_name = models.CharField(max_length=150, blank=False)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ('username', 'first_name', 'last_name',)
+    REQUIRED_FIELDS = ('username', 'first_name', 'last_name', 'password')
 
     class Meta:
         ordering = ['username']
