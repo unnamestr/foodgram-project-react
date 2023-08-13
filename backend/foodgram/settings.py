@@ -3,8 +3,7 @@ import os
 import environ
 from pathlib import Path
 
-env = environ.Env(ALLOWED_HOSTS=(list, ["localhost", "127.0.0.1"]),
-                  DEBUG=(bool, False),
+env = environ.Env(DEBUG=(bool, False),
                   SECRET_KEY=(str, 'django-insecure-oxthbs+oj66i-changeme'),
                   POSTGRES_DB=(str, 'django'),
                   POSTGRES_USER=(str, 'django'),
@@ -25,10 +24,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = env.str('SECRET_KEY', 'django-insecure-oxthbs+oj66i-changeme')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env.bool('DEBUG', True)
+DEBUG = env.bool('DEBUG', False)
 
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
-
+#ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
+#ALLOWED_HOSTS = (list, ["localhost", "127.0.0.1"]),
+ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
 # Application definition
 
@@ -83,25 +83,23 @@ WSGI_APPLICATION = 'foodgram.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
 DATABASES = {
     'default': {
-        # Меняем настройку Django: теперь для работы будет использоваться
-        # бэкенд postgresql
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env.str('POSTGRES_DB', 'django'),
-        'USER': env.str('POSTGRES_USER', 'django'),
-        'PASSWORD': env.str('POSTGRES_PASSWORD', 'django'),
-        'HOST': env.str('DB_HOST', 'localhost'),
-        'PORT': env.str('DB_PORT', 5432)
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': env.str('POSTGRES_DB', 'django'),
+#         'USER': env.str('POSTGRES_USER', 'django'),
+#         'PASSWORD': env.str('POSTGRES_PASSWORD', 'django'),
+#         'HOST': env.str('DB_HOST', 'localhost'),
+#         'PORT': env.str('DB_PORT', 5432)
+#     }
+# }
 
 
 # Password validation
@@ -162,5 +160,5 @@ MEDIA_URL = '/media/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 DJOSER = {
-    'LOGIN_FIELD': "email",
+    'LOGIN_FIELD': 'email',
 }

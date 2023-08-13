@@ -39,7 +39,7 @@ class User(AbstractUser):
         if self.is_following(author):
             Follower.objects.filter(user=self, author=author).delete()
 
-    def is_following(self, author):
+    def is_following(self, author) -> bool:
         return Follower.objects.filter(user=self, author=author).exists()
 
 

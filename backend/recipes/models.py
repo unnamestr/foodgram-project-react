@@ -5,10 +5,13 @@ from recipes.validators import (validate_recipe_cooking_time,
                                 validate_tag_slug,
                                 validate_ingredientInRecipe_amount)
 
+NAME_MAX_LENGHT = 200
+
 
 class Tag(models.Model):
 
-    name = models.CharField(max_length=200, unique=True, db_index=True)
+    name = models.CharField(max_length=NAME_MAX_LENGHT, unique=True,
+                            db_index=True)
     color = models.CharField(max_length=7, unique=True)
     slug = models.SlugField(unique=True, validators=[validate_tag_slug])
 
@@ -22,12 +25,12 @@ class Tag(models.Model):
 class Recipe(models.Model):
     author = models.ForeignKey(User, related_name='recipes',
                                on_delete=models.CASCADE, db_index=True)
-    name = models.CharField(max_length=200, unique=True)
+    name = models.CharField(max_length=NAME_MAX_LENGHT, unique=True)
     image = models.ImageField(upload_to='upload/', null=True)
     text = models.TextField()
     tags = models.ManyToManyField(Tag)
-    cooking_time = models.IntegerField(validators=[
-                                       validate_recipe_cooking_time])
+    cooking_time = models.PositiveSmallIntegerField(validators=[
+                   validate_recipe_cooking_time])
     pub_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -39,8 +42,8 @@ class Recipe(models.Model):
 
 class Ingredient(models.Model):
 
-    name = models.CharField(max_length=200, unique=True)
-    measurement_unit = models.CharField(max_length=200)
+    name = models.CharField(max_length=NAME_MAX_LENGHT, unique=True)
+    measurement_unit = models.CharField(max_length=NAME_MAX_LENGHT)
 
     def __str__(self):
         return self.name
@@ -55,8 +58,8 @@ class IngredientInRecipe(models.Model):
     ingredient = models.ForeignKey(Ingredient,
                                    related_name='ingredient_counter',
                                    on_delete=models.CASCADE)
-    amount = models.IntegerField(validators=[
-                                 validate_ingredientInRecipe_amount])
+    amount = models.PositiveSmallIntegerField(validators=[
+             validate_ingredientInRecipe_amount])
 
     class Meta:
         constraints = (models.UniqueConstraint(

@@ -8,6 +8,7 @@ from recipes.models import Recipe, Tag
 
 
 class RecipeFilter(FilterSet):
+    """Фильтр для рецептов."""
     author = ModelChoiceFilter(queryset=User.objects.all())
     tags = ModelMultipleChoiceFilter(queryset=Tag.objects.all(),
                                      field_name='tags__slug',

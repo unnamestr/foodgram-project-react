@@ -11,8 +11,7 @@ from rest_framework.mixins import (CreateModelMixin, ListModelMixin,
                                    RetrieveModelMixin)
 from django_filters.rest_framework import DjangoFilterBackend
 
-from recipes.models import (Tag, Ingredient, Recipe,
-                            FavoriteRecipe, ShoppingCart)
+from recipes.models import (Tag, Ingredient, Recipe)
 from users.models import User
 from api.filters import RecipeFilter
 from api.permissions import AuthorPermission
@@ -24,12 +23,14 @@ from api.serializers import (TagSerializer, IngredientSerializer,
 
 
 class TagViewSet(ReadOnlyModelViewSet):
+    """ViewSet для тэгов."""
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     pagination_class = None
 
 
 class IngredientViewSet(ReadOnlyModelViewSet):
+    """ViewSet для ингридиентов."""
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     filter_backends = (filters.SearchFilter,)
@@ -38,6 +39,7 @@ class IngredientViewSet(ReadOnlyModelViewSet):
 
 
 class RecipeViewSet(ModelViewSet):
+    """ViewSet для рецептов."""
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     filter_backends = (DjangoFilterBackend,)
@@ -51,6 +53,7 @@ class RecipeViewSet(ModelViewSet):
 
 
 class FavoriteRecipeView(APIView):
+    """ViewSet для избранного."""
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, recipe_id):
@@ -64,17 +67,17 @@ class FavoriteRecipeView(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request, recipe_id):
-        user_id = request.user.id
-        if not FavoriteRecipe.objects.filter(user=user_id,
-                                             recipe=recipe_id).exists():
+        user = request.user
+        recipe = get_object_or_404(Recipe, id=recipe_id)
+        if not user.favorite.filter(recipe=recipe).exists():
             return Response({"errors": "рецепта нет в избранном"},
                             status=status.HTTP_400_BAD_REQUEST)
-        recipe = get_object_or_404(Recipe, id=recipe_id)
-        FavoriteRecipe.objects.filter(user=user_id, recipe=recipe).delete()
+        user.favorite.filter(recipe=recipe).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ShoppingCartView(APIView):
+    """ViewSet для корзины."""
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, recipe_id):
@@ -88,13 +91,13 @@ class ShoppingCartView(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request, recipe_id):
-        user_id = request.user.id
-        if not ShoppingCart.objects.filter(user=user_id,
-                                           recipe=recipe_id).exists():
+        user = request.user
+        recipe = get_object_or_404(Recipe, id=recipe_id)
+        if not user.shopping_cart.filter(recipe=recipe).exists():
             return Response({"errors": "рецепта нет в списке покупок"},
                             status=status.HTTP_400_BAD_REQUEST)
-        recipe = get_object_or_404(Recipe, id=recipe_id)
-        ShoppingCart.objects.filter(user=user_id, recipe=recipe).delete()
+
+        user.shopping_cart.filter(recipe=recipe).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -114,6 +117,7 @@ def download_shopping_cart(request):
 
 class UserViewSet(CreateModelMixin, ListModelMixin, RetrieveModelMixin,
                   GenericViewSet):
+    """ViewSet для пользователя."""
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (AllowAny,)
@@ -164,8 +168,9 @@ class UserViewSet(CreateModelMixin, ListModelMixin, RetrieveModelMixin,
             permission_classes=[IsAuthenticated])
     def subscriptions(self, request):
         recipes_limit = request.query_params.get('recipes_limit')
-        c = {"request": request, 'recipes_limit': recipes_limit}
-        u = request.user
+        context = {"request": request, 'recipes_limit': recipes_limit}
+        user = request.user
         serializer = UserWithRecipeSerializer(self.paginate_queryset(
-            User.objects.filter(following__user=u)), many=True, context=c)
+            User.objects.filter(following__user=user)), many=True,
+                                context=context)
         return self.get_paginated_response(serializer.data)
