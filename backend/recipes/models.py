@@ -1,9 +1,10 @@
 from django.db import models
 
 from users.models import User
-from recipes.validators import (validate_recipe_cooking_time,
-                                validate_tag_slug,
-                                validate_ingredientInRecipe_amount)
+from recipes.validators import validate_tag_slug
+from recipes.validators import validate_recipe_cooking_time as vldreccook
+from recipes.validators import validate_ingredientInRecipe_amount as vldingrec
+# очень длинные названия) пришлось сокращать для пеп8))))
 
 NAME_MAX_LENGHT = 200
 
@@ -29,8 +30,7 @@ class Recipe(models.Model):
     image = models.ImageField(upload_to='upload/', null=True)
     text = models.TextField()
     tags = models.ManyToManyField(Tag)
-    cooking_time = models.PositiveSmallIntegerField(validators=[
-                   validate_recipe_cooking_time])
+    cooking_time = models.PositiveSmallIntegerField(validators=[vldreccook])
     pub_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -58,8 +58,7 @@ class IngredientInRecipe(models.Model):
     ingredient = models.ForeignKey(Ingredient,
                                    related_name='ingredient_counter',
                                    on_delete=models.CASCADE)
-    amount = models.PositiveSmallIntegerField(validators=[
-             validate_ingredientInRecipe_amount])
+    amount = models.PositiveSmallIntegerField(validators=[vldingrec])
 
     class Meta:
         constraints = (models.UniqueConstraint(

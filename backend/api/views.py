@@ -18,8 +18,9 @@ from api.permissions import AuthorPermission
 from api.serializers import (TagSerializer, IngredientSerializer,
                              RecipeSerializer, FavoriteRecipeSerializer,
                              ShoppingCartSerializer, UserSerializer,
-                             PasswordSerializer, UserWithRecipeSerializer,
+                             PasswordSerializer,
                              CreateRecipeSerializer)
+from api.serializers import UserWithRecipeSerializer as UserRecipeSer
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -130,7 +131,7 @@ class UserViewSet(CreateModelMixin, ListModelMixin, RetrieveModelMixin,
 
     @action(detail=False, methods=['post'], url_path='set_password',
             permission_classes=[IsAuthenticated])
-    def set_password(self, request):
+    def set_password_func(self, request):
         user = request.user
         serializer = PasswordSerializer(data=request.data, context={'request':
                                                                     request})
@@ -155,7 +156,7 @@ class UserViewSet(CreateModelMixin, ListModelMixin, RetrieveModelMixin,
                                 status=status.HTTP_400_BAD_REQUEST)
             user.follow(author)
             recipes_limit = request.query_params.get('recipes_limit')
-            serializer = UserWithRecipeSerializer(author, context={
+            serializer = UserRecipeSer(author, context={
                 'request': request, 'recipes_limit': recipes_limit})
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         if not user.is_following(author):
@@ -170,7 +171,7 @@ class UserViewSet(CreateModelMixin, ListModelMixin, RetrieveModelMixin,
         recipes_limit = request.query_params.get('recipes_limit')
         context = {"request": request, 'recipes_limit': recipes_limit}
         user = request.user
-        serializer = UserWithRecipeSerializer(self.paginate_queryset(
-            User.objects.filter(following__user=user)), many=True,
-                                context=context)
+        query = User.objects.filter(following__user=user)
+        serializer = UserRecipeSer(self.paginate_queryset(query),
+                                   many=True, context=context)
         return self.get_paginated_response(serializer.data)
