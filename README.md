@@ -7,7 +7,7 @@ Python, Django REST API, PostgresQL, Docker, Yandex.Cloud.
 ## Доступность приложения
 
 ip: 158.160.73.93
-superuser: admin;admin
+superuser: admin@admin.ru;admin
 domain: foodgram56.ddns.net
 
 ## Установка
