@@ -4,7 +4,6 @@ from users.models import User
 from recipes.validators import validate_tag_slug
 from recipes.validators import validate_recipe_cooking_time as vldreccook
 from recipes.validators import validate_ingredientInRecipe_amount as vldingrec
-# очень длинные названия) пришлось сокращать для пеп8))))
 
 NAME_MAX_LENGHT = 200
 
