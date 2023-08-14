@@ -12,9 +12,10 @@ domain: foodgram56.ddns.net
 
 ## Установка
 Для запуска локально, создайте файл `.env` в родительской директории.
+Или используйте .env.example
 
 ```
-Или используйте готовый .env.example подставив там свои данные
+touch .env
 ```
 
 #### Установка Docker
@@ -43,6 +44,8 @@ docker-compose exec backend python manage.py createsuperuser
 5. Соберите статику:
 ```bash
 docker-compose exec backend python manage.py collectstatic
-
+```
+5. Переместите статику:
+```bash
 docker compose exec backend cp -r /app/static/. /static/static/ 
 ```
