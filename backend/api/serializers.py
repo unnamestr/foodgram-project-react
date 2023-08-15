@@ -76,7 +76,8 @@ class RecipeSerializer(RecipeBaseSerializer):
         fields = RecipeBaseSerializer.Meta.fields + ['tags', 'author',
                                                      'ingredients',
                                                      'is_favorited',
-                                                     'is_in_shopping_cart']
+                                                     'is_in_shopping_cart',
+                                                     'text']
 
     def get_is_favorited(self, obj):
         request = self.context.get('request')
