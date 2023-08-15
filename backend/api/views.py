@@ -13,7 +13,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from recipes.models import (Tag, Ingredient, Recipe)
 from users.models import User
-from api.filters import RecipeFilter
+from api.filters import RecipeFilter, IngredientFilter
 from api.permissions import AuthorPermission
 from api.serializers import (TagSerializer, IngredientSerializer,
                              RecipeSerializer, FavoriteRecipeSerializer,
@@ -34,8 +34,10 @@ class IngredientViewSet(ReadOnlyModelViewSet):
     """ViewSet для ингридиентов."""
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    filter_backends = (filters.SearchFilter,)
+    filter_backends = (filters.SearchFilter, DjangoFilterBackend)
+    filterset_fields = ('name', )
     search_fields = ('^name',)
+    filterset_class = IngredientFilter
     pagination_class = None
 
 

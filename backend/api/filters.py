@@ -1,10 +1,10 @@
 from django_filters.rest_framework.filters import (ModelChoiceFilter,
                                                    ModelMultipleChoiceFilter,
-                                                   BooleanFilter)
+                                                   BooleanFilter, CharFilter)
 from django_filters.rest_framework import FilterSet
 
 from users.models import User
-from recipes.models import Recipe, Tag
+from recipes.models import Recipe, Tag, Ingredient
 
 
 class RecipeFilter(FilterSet):
@@ -32,3 +32,12 @@ class RecipeFilter(FilterSet):
     def filter_is_in_shopping_cart(self, queryset, name, value):
         return self.filter_related(queryset, self.request.user.shopping_cart,
                                    value)
+
+
+class IngredientFilter(FilterSet):
+    """Фильтр для ингридиентов"""
+    name = CharFilter(field_name='name', lookup_expr='contains')
+
+    class Meta:
+        model = Ingredient
+        fields = ('name',)
