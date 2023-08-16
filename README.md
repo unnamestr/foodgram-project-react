@@ -6,9 +6,8 @@ Python, Django REST API, PostgresQL, Docker, Yandex.Cloud.
 
 ## Доступность приложения
 
-ip: 158.160.73.93
+domain: https://foodgram56.ddns.net
 superuser: admin@admin.ru;admin
-domain: foodgram56.ddns.net
 
 ## Установка
 Для запуска локально, создайте файл `.env` в родительской директории.
