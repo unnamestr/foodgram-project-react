@@ -50,9 +50,9 @@ class RecipeViewSet(ModelViewSet):
     filterset_class = RecipeFilter
 
     def get_serializer_class(self):
-        if not self.request.method == "GET":
-            return CreateRecipeSerializer
-        return RecipeSerializer
+        if self.request.method == "GET":
+            return RecipeSerializer
+        return CreateRecipeSerializer
 
 
 class FavoriteRecipeView(APIView):

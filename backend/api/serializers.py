@@ -190,14 +190,16 @@ class CreateRecipeSerializer(ModelSerializer):
             if item['id'] in uniq_ingredient:
                 raise ValidationError('Use uniq ingredients')
             if not Ingredient.objects.filter(id=item['id']).exists():
-                raise ValidationError('ingredient not found.')
+                raise ValidationError('Ingredient not found.')
+            if item['amount'] == 0:
+                raise ValidationError('Ingredient amount cannot be 0.')
             uniq_ingredient.add(item['id'])
 
         return data
 
     def validate_cooking_time(self, value):
         if value < 1:
-            raise ValidationError('time cannot be less than 1')
+            raise ValidationError('Time cannot be less than 1')
         return value
 
     def create(self, data):
