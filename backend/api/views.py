@@ -10,6 +10,7 @@ from django.http.response import HttpResponse
 from rest_framework.mixins import (CreateModelMixin, ListModelMixin,
                                    RetrieveModelMixin)
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.pagination import LimitOffsetPagination
 
 from recipes.models import (Tag, Ingredient, Recipe)
 from users.models import User
@@ -48,6 +49,7 @@ class RecipeViewSet(ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (AuthorPermission,)
     filterset_class = RecipeFilter
+    pagination_class = LimitOffsetPagination
 
     def get_serializer_class(self):
         if self.request.method == "GET":
