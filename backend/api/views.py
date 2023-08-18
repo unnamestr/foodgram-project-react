@@ -10,7 +10,6 @@ from django.http.response import HttpResponse
 from rest_framework.mixins import (CreateModelMixin, ListModelMixin,
                                    RetrieveModelMixin)
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.pagination import LimitOffsetPagination
 
 from recipes.models import (Tag, Ingredient, Recipe)
 from users.models import User
@@ -22,7 +21,7 @@ from api.serializers import (TagSerializer, IngredientSerializer,
                              PasswordSerializer,
                              CreateRecipeSerializer)
 from api.serializers import UserWithRecipeSerializer as UserRecipeSer
-
+from api.paginations import RecipePagination
 
 class TagViewSet(ReadOnlyModelViewSet):
     """ViewSet для тэгов."""
@@ -49,7 +48,7 @@ class RecipeViewSet(ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (AuthorPermission,)
     filterset_class = RecipeFilter
-    pagination_class = LimitOffsetPagination
+    pagination_class = RecipePagination
 
     def get_serializer_class(self):
         if self.request.method == "GET":
