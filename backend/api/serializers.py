@@ -184,22 +184,24 @@ class CreateRecipeSerializer(ModelSerializer):
 
     def validate_ingredients(self, data):
         if len(data) == 0:
-            raise ValidationError('Need ingredients')
+            raise ValidationError({'ingredients': 'Need ingredients'})
         uniq_ingredient = set()
         for item in data:
             if item['id'] in uniq_ingredient:
-                raise ValidationError('Use uniq ingredients')
+                raise ValidationError({'ingredients': 'Use uniq ingredients'})
             if not Ingredient.objects.filter(id=item['id']).exists():
-                raise ValidationError('Ingredient not found.')
+                raise ValidationError({'ingredients': 'Ingredient not found.'})
             if item['amount'] == 0:
-                raise ValidationError('Ingredient amount cannot be 0.')
+                raise ValidationError({'amount':
+                                       'Ingredient amount cannot be 0.'})
             uniq_ingredient.add(item['id'])
 
         return data
 
     def validate_cooking_time(self, value):
         if value < 1:
-            raise ValidationError('Time cannot be less than 1')
+            raise ValidationError({'cooking_time':
+                                   'Time cannot be less than 1'})
         return value
 
     def create(self, data):
