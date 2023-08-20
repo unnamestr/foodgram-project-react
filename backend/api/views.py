@@ -23,6 +23,7 @@ from api.serializers import (TagSerializer, IngredientSerializer,
 from api.serializers import UserWithRecipeSerializer as UserRecipeSer
 from api.paginations import RecipePagination
 
+
 class TagViewSet(ReadOnlyModelViewSet):
     """ViewSet для тэгов."""
     queryset = Tag.objects.all()
